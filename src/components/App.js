@@ -2,9 +2,14 @@ import React from 'react';
 import Searchbar from './Searchbar'
 import youtube from '../api/youtube';
 import VideoList from './VideoList';
+import VideoDetail from './VideoDetail';
 
 class App extends React.Component {
-    state = { videos: [] };
+    state = { videos: [], selectedVideo: null };
+
+    componentDidMount(){
+        this.onTermSubmit('Rick and Morty New Season')
+    }
 
     onTermSubmit = async (term) => {
         const response = await youtube.get('/search', {
@@ -15,16 +20,30 @@ class App extends React.Component {
 
         
         this.setState({
-            videos: response.data.items
+            videos: response.data.items,
+            selectedVideo: response.data.items[0]
         })
     };
 
+    onVideoSelect = (video) => {
+        this.setState({
+            selectedVideo: video
+        })
+
+    }
+
     render () {
-        return (<div>
-                    <div className="ui container"> <Searchbar onSubmitForm={this.onTermSubmit}/> </div>
-                    <div className="ui container">Found {this.state.videos.length} videos.</div>
-                    <div><VideoList videos={this.state.videos}/></div>
-                </div>);
+        return (
+                    <div className="ui container">
+                        <Searchbar onSubmitForm={this.onTermSubmit}/>
+                        <div className="ui grid">
+                            <div className="ui row">
+                                <div className="eleven wide column"><VideoDetail video={this.state.selectedVideo}/></div>
+                                <div className="five wide column"><VideoList videos={this.state.videos} onSelectVideo={this.onVideoSelect}/></div>
+                            </div>
+                        </div>
+                    </div>
+                );
     }
 }
 
